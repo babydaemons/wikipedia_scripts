@@ -24,14 +24,19 @@ sub get_text($) {
   my $end = index($page, $suffix);
   my $len = $end - $start;
   my $text = substr($page, $start, $len);
-  $text =~ s/&gt;/</gm;
-  $text =~ s/&lt;/>/gm;
-  $text =~ s/&amp;/&/gm;
+  $text =~ s|&gt;|>|gm;
+  $text =~ s|&lt;|<|gm;
+  $text =~ s|&amp;|&|gm;
+  $text =~ s|&quot;|"|gm;
+  $text =~ s|<br\s*?/>| |gmi;
+  $text =~ s|<small>([^<>]+)</small>|\1|gm;
+  $text =~ s|<ref>([^<>]+)</ref>||gm;
   return $text;
 }
 
 sub parse_links($) {
   my ($text) = @_;
+  $text =~ s/\[\[ファイル:[^\|]+\|[0-9]+px\]\]//g;
   $text =~ s/\[\[[^\|\[\]]+\|([^\[\]]+)\]\]/\1/g;
   $text =~ s/\[\[([^\[\]]+)\]\]/\1/g;
   return $text;
@@ -55,13 +60,17 @@ sub get_title_ruby($$) {
   my $target = get_content($text, $key, '。');
   my $title_ruby = get_content($target, '（', '）');
   $title_ruby = get_content($target, '(', ')') if ($title_ruby eq "");
+  $title_ruby =~ s/、.+$//;
   $title_ruby = $1 if ($title_ruby =~ m/'''(.+)'''/);
+  $title_ruby = $1 if ($title_ruby =~ m/''(.+)''/);
   $title_ruby = $1 if ($title_ruby eq "" && $text =~ m/{デフォルトソート:([^{}]+)}/m);
   return $title_ruby;
 }
 
-my $page = get_page($ARGV[0]);
-my $title = get_title($page);
-my $text = get_text($page);
-my $title_ruby = get_title_ruby($text, $title);
-print "$title_ruby\n"
+for my $input (@ARGV) {
+  my $page = get_page($input);
+  my $title = get_title($page);
+  my $text = get_text($page);
+  my $title_ruby = get_title_ruby($text, $title);
+  print "$input\t$title\t$title_ruby\n"
+}

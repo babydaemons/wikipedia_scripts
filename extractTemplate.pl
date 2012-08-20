@@ -1,7 +1,14 @@
 #!/usr/bin/perl
 use strict;
-
 use constant MAX => 0x7FFFFFF;
+
+sub get_page($) {
+  my ($input) = @_;
+  open(my $in, '<', $input) or die "$0: $!: $input";
+  my $page; { local $/ = undef; $page = <$in>; }
+  close($in);
+  return $page;
+}
 
 sub get_text($) {
   my ($page) = @_;
@@ -11,6 +18,13 @@ sub get_text($) {
   my $end = index($page, $suffix);
   my $len = $end - $start;
   my $text = substr($page, $start, $len);
+  $text =~ s|&gt;|>|gm;
+  $text =~ s|&lt;|<|gm;
+  $text =~ s|&amp;|&|gm;
+  $text =~ s|&quot;|"|gm;
+  $text =~ s|<br\s*?/>| |gmi;
+  $text =~ s|<small>([^<>]+)</small>|\1|gm;
+  $text =~ s|<ref>([^<>]+)</ref>||gm;
   return $text;
 }
 
@@ -63,9 +77,7 @@ sub get_templates($) {
   return @templates;
 }
 
-my $input = $ARGV[0];
-open(IN, '<', $input) or die "$0: $!: $input";
-my $page; { local $/ = undef; $page = <IN>; }
+my $page = get_page($ARGV[0]);
 my $text = get_text($page);
 my @templates = get_templates($text);
 print join("\n####################\n" => @templates) . "\n";

@@ -16,8 +16,8 @@ while (<IN>) {
   }
   push(@lines, $_);
   if ($_ eq "</page>\n") {
-    my $n = int($i / 1000);
-    my $m = int($i % 1000);
+    my $n = int($i / 10000);
+    my $m = int($i % 10000);
     my $outdir = sprintf($outdir_base, $n);
     my $output = sprintf($output_base, $n, $m);
     mkdir $outdir unless -d $outdir;
