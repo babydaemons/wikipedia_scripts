@@ -28,9 +28,14 @@ sub get_text($) {
   $text =~ s|&lt;|<|gm;
   $text =~ s|&amp;|&|gm;
   $text =~ s|&quot;|"|gm;
-  $text =~ s|<br\s*?/>| |gmi;
-  $text =~ s|<small>([^<>]+)</small>|\1|gm;
-  $text =~ s|<ref>([^<>]+)</ref>||gm;
+  $text =~ s|</?\s*br\s*/?\s*>| |gmi;
+  $text =~ s|<span\s*[^<>]*>([^<>]+)</span>|\1|gi;
+  $text =~ s|<div\s*[^<>]*>([^<>]+)</div>|\1|gi;
+  $text =~ s|<font\*[^<>]*>([^<>]+)</font>|\1|gm;
+  $text =~ s|<center>([^<>]+)</center>|\1|gm;
+  $text =~ s|<ref[^<>]*>([^<>]+)</ref>||gm;
+  $text =~ s|<ref\s+[^<>]+\s*/\s*>||gm;
+  $text =~ s|<!--.+-->||gs;
   return $text;
 }
 
@@ -86,9 +91,10 @@ sub get_templates($) {
 
 sub parse_links($) {
   my ($text) = @_;
-  $text =~ s/\[\[ファイル:[^\|]+\|[0-9]+px\]\]//g;
+  $text =~ s/\[\[(?:ファイル|File):[^\[\]]+\]\]//g;
   $text =~ s/\[\[[^\|\[\]]+\|([^\[\]]+)\]\]/\1/g;
   $text =~ s/\[\[([^\[\]]+)\]\]/\1/g;
+  $text =~ s|\[http://\S+ (\S+?)\]|\1|g;
   return $text;
 }
 
@@ -99,8 +105,16 @@ sub get_address($) {
     $_ = parse_links($_);
     next unless m/(?:[|]|{{)\s*[^|{}]*(?:所在地|都市)\s*=\s*([^|{}]+)/s;
     my $address = $1;
+    $address =~ s/\s+/ /g;
     $address =~ s/(^\s+|\s+$)//g;
-    $address =~ s/^〒\d{3}-\d{4}//g;
+    $address =~ s/【.*?】//g;
+    $address =~ s/（.*?）//g;
+    $address =~ s/＜.*?＞//g;
+    $address =~ s/'''.+?'''//g;
+    $address =~ s/''.+?''//g;
+    $address =~ s/〒\d{3}-\d{4}//g;
+    $address =~ s|<ref\s*?>.+?</ref>||gi;
+    $address =~ s/(^\s+|\s+$)//g;
     return $address;
   }
   return "";
