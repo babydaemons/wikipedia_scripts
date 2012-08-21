@@ -98,23 +98,30 @@ sub parse_links($) {
   return $text;
 }
 
-sub get_address($) {
-  my ($ref_templates) = @_;
+sub get_address($$) {
+  my ($ref_templates, $title) = @_;
   for (@$ref_templates) {
     $_ = parse_links($_);
-    next unless m/(?:[|]|{{)\s*[^|{}]*(?:所在地|都市)\s*=\s*([^|{}]+)/s;
-    my $address = $1;
-    $address =~ s/\s+/ /g;
-    $address =~ s/(^\s+|\s+$)//g;
-    $address =~ s/【.*?】//g;
-    $address =~ s/（.*?）//g;
-    $address =~ s/＜.*?＞//g;
-    $address =~ s/'''.+?'''//g;
-    $address =~ s/''.+?''//g;
-    $address =~ s/〒\d{3}-\d{4}//g;
-    $address =~ s|<ref\s*?>.+?</ref>||gi;
-    $address =~ s/(^\s+|\s+$)//g;
-    return $address;
+    if (m/(?:[|]|{{)\s*[^|{}]*(?:所在地|都市)\s*=\s*([^|{}]+)/s) {
+      my $address = $1;
+      $address =~ s/\s+/ /g;
+      $address =~ s/(^\s+|\s+$)//g;
+      $address =~ s/【.*?】//g;
+      $address =~ s/（.*?）//g;
+      $address =~ s/＜.*?＞//g;
+      $address =~ s/'''.+?'''//g;
+      $address =~ s/''.+?''//g;
+      $address =~ s/〒\d{3}-\d{4}//g;
+      $address =~ s|<ref\s*?>.+?</ref>||gi;
+      $address =~ s/(^\s+|\s+$)//g;
+      return $address;
+    }
+    if (m/^{{Pathnav\|日本\|(.*?)\|frame=1}}$/s) {
+      my $address = $1;
+      $address =~ s/\|//g;
+      $address .= $title unless $address =~ m/hide=y/;
+      return $address;
+    }
   }
   return "";
 }
@@ -170,7 +177,7 @@ for my $input (@ARGV) {
   my $title = get_title($page);
   my $text = get_text($page);
   my @templates = get_templates($text);
-  my $address = get_address(\@templates);
+  my $address = get_address(\@templates, $title);
   my $location = get_location(\@templates);
   print "$input\t$title\t$address\t$location\n" if ($address ne "" || $location ne "");
 }
