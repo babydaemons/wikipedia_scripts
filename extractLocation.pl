@@ -106,27 +106,27 @@ sub get_location($) {
     if (m/^{{(?:ウィキ座標.*?|[Cc]oord|[Cc]oor\s+(?:title\s+)?dms)\|(\d+)\|(\d+)\|([\d\.]+)\|([NS])\|(\d+)\|(\d+)\|([\d\.]+)\|([EW])\|.*}}$/s) {
       my $lat = $1 + ($2 / 60) + ($3 / 3600); $lat = -$lat if $4 eq 'S';
       my $lng = $5 + ($6 / 60) + ($7 / 3600); $lng = -$lng if $8 eq 'W';
-      return "$lat,$lng";
+      return "$lat\t$lng";
     }
     if (m/^{{日本の位置情報\|(\d+)\|(\d+)\|([\d\.]+)\|(\d+)\|(\d+)\|([\d\.]+)\|.*}}$/s) {
       my $lat = $1 + ($2 / 60) + ($3 / 3600);
       my $lng = $4 + ($5 / 60) + ($6 / 3600);
-      return "$lat,$lng";
+      return "$lat\t$lng";
     }
     if (m/^{{(?:[Cc]oord|Mapplot)\|(-?\d+\.\d+)\|(-?\d+\.\d+)\|.*}}$/s) {
       my $lat = $1;
       my $lng = $2;
-      return "$lat,$lng";
+      return "$lat\t$lng";
     }
     if (m/^{{[Cc]oord\|(-?\d+\.\d+)\|[NS]\|(-?\d+\.\d+)\|[EW]\|.*}}$/s) {
       my $lat = $1; $lat = -$lat if $2 eq 'S';
       my $lng = $3; $lng = -$lng if $4 eq 'S';
-      return "$lat,$lng";
+      return "$lat\t$lng";
     }
     if (m/^{{[Cc]oord\|(\d+)\|([\d\.]+)\|([NS])\|(\d+)\|([\d\.]+)\|([EW])\|.*}}$/s) {
       my $lat = $1 + ($2 / 60); $lat = -$lat if $3 eq 'S';
       my $lng = $4 + ($5 / 60); $lng = -$lng if $6 eq 'W';
-      return "$lat,$lng";
+      return "$lat\t$lng";
     }
     next unless m/(?:緯度度|lat_deg)\s*=\s*(-?\d+)/s;
     my $lat_deg = $1;
@@ -138,6 +138,9 @@ sub get_location($) {
     my $lng_sec = (m/(?:経度秒|lon_sec)\s*=\s*([\d\.]+)/s) ? $1 : 0;
     my $lat_dir = (m/(?:N\(北緯\)及びS\(南緯\)|lat_dir)\s*=\s*([NS])/s && $1 eq 'S') ? -1 : 1;
     my $lng_dir = (m/(?:E\(東経\)及びW\(西経\)|lon_dir)\s*=\s*([EW])/s && $1 eq 'S') ? -1 : 1;
+    my $lat = $lat_dir * ($lat_deg + ($lat_min / 60) + ($lat_sec / 3600));
+    my $lng = $lng_dir * ($lng_deg + ($lng_min / 60) + ($lng_sec / 3600));
+    return "$lat\t$lng";
   }
   return "";
 }
