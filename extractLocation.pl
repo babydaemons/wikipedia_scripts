@@ -99,9 +99,8 @@ sub parse_links($) {
 }
 
 sub get_location($) {
-  my ($text) = @_;
-  my @templates = get_templates($text);
-  for (@templates) {
+  my ($ref_templates) = @_;
+  for (@$ref_templates) {
     $_ = parse_links($_);
     if (m/^{{(?:ウィキ座標.*?|[Cc]oord|[Cc]oor\s+(?:title\s+)?dms)\|(\d+)\|(\d+)\|([\d\.]+)\|([NS])\|(\d+)\|(\d+)\|([\d\.]+)\|([EW])\|.*}}$/s) {
       my $lat = $1 + ($2 / 60) + ($3 / 3600); $lat = -$lat if $4 eq 'S';
@@ -149,6 +148,7 @@ for my $input (@ARGV) {
   my $page = get_page($input);
   my $title = get_title($page);
   my $text = get_text($page);
-  my $location = get_location($text);
+  my @templates = get_templates($text);
+  my $location = get_location(\@templates);
   print "$input\t$title\t$location\n" if $location ne "";
 }

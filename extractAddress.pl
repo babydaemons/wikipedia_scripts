@@ -99,9 +99,8 @@ sub parse_links($) {
 }
 
 sub get_address($) {
-  my ($text) = @_;
-  my @templates = get_templates($text);
-  for (@templates) {
+  my ($ref_templates) = @_;
+  for (@$ref_templates) {
     $_ = parse_links($_);
     next unless m/(?:[|]|{{)\s*[^|{}]*(?:所在地|都市)\s*=\s*([^|{}]+)/s;
     my $address = $1;
@@ -124,6 +123,7 @@ for my $input (@ARGV) {
   my $page = get_page($input);
   my $title = get_title($page);
   my $text = get_text($page);
-  my $address = get_address($text);
+  my @templates = get_templates($text);
+  my $address = get_address(\@templates);
   print "$input\t$title\t$address\n" if $address ne "";
 }
