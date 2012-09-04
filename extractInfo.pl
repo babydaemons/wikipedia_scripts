@@ -123,7 +123,7 @@ sub get_address($$) {
       return $address;
     }
   }
-  return "";
+  return "住所不明";
 }
 
 sub get_location($) {
@@ -169,7 +169,7 @@ sub get_location($) {
     my $lng = $lng_dir * ($lng_deg + ($lng_min / 60) + ($lng_sec / 3600));
     return "$lat\t$lng";
   }
-  return "";
+  return "999.99999\t999.99999";
 }
 
 for my $input (@ARGV) {
@@ -179,5 +179,5 @@ for my $input (@ARGV) {
   my @templates = get_templates($text);
   my $address = get_address(\@templates, $title);
   my $location = get_location(\@templates);
-  print "$input\t$title\t$address\t$location\n" if ($address ne "" || $location ne "");
+  print "$input\t$title\t$address\t$location\n" if ($address ne "住所不明" || $location ne "999.99999\t999.99999");
 }
