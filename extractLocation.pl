@@ -136,7 +136,7 @@ sub get_location($) {
     my $lat_sec = (m/(?:緯度秒|lat_sec)\s*=\s*([\d\.]+)/s) ? $1 : 0;
     my $lng_sec = (m/(?:経度秒|lon_sec)\s*=\s*([\d\.]+)/s) ? $1 : 0;
     my $lat_dir = (m/(?:N\(北緯\)及びS\(南緯\)|lat_dir)\s*=\s*([NS])/s && $1 eq 'S') ? -1 : 1;
-    my $lng_dir = (m/(?:E\(東経\)及びW\(西経\)|lon_dir)\s*=\s*([EW])/s && $1 eq 'S') ? -1 : 1;
+    my $lng_dir = (m/(?:E\(東経\)及びW\(西経\)|lon_dir)\s*=\s*([EW])/s && $1 eq 'W') ? -1 : 1;
     my $lat = $lat_dir * ($lat_deg + ($lat_min / 60) + ($lat_sec / 3600));
     my $lng = $lng_dir * ($lng_deg + ($lng_min / 60) + ($lng_sec / 3600));
     return "$lat\t$lng";
