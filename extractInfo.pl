@@ -150,21 +150,21 @@ sub get_location($) {
       my $lng = $3; $lng = -$lng if $4 eq 'S';
       return "$lat\t$lng";
     }
-    if (m/^{{[Cc]oord\|(\d+)\|([\d\.]+)\|([NS])\|(\d+)\|([\d\.]+)\|([EW])\|.*}}$/s) {
+    if (m/^{{[Cc]oord\|(\d+)\|(\d+\.?\d*)\|([NS])\|(\d+)\|(\d+\.?\d*)\|([EW])\|.*}}$/s) {
       my $lat = $1 + ($2 / 60); $lat = -$lat if $3 eq 'S';
       my $lng = $4 + ($5 / 60); $lng = -$lng if $6 eq 'W';
       return "$lat\t$lng";
     }
-    next unless m/(?:緯度度|lat_deg)\s*=\s*(-?\d+)/s;
+    next unless m/(?:緯度度|lat_deg|latd)\s*=\s*(-?\d+)/s;
     my $lat_deg = $1;
-    next unless m/(?:経度度|lon_deg)\s*=\s*(-?\d+)/s;
+    next unless m/(?:経度度|lon_deg|longd)\s*=\s*(-?\d+)/s;
     my $lng_deg = $1;
-    my $lat_min = (m/(?:緯度分|lat_min)\s*=\s*([\d\.]+)/s) ? $1 : 0;
-    my $lng_min = (m/(?:経度分|lon_min)\s*=\s*([\d\.]+)/s) ? $1 : 0;
-    my $lat_sec = (m/(?:緯度秒|lat_sec)\s*=\s*([\d\.]+)/s) ? $1 : 0;
-    my $lng_sec = (m/(?:経度秒|lon_sec)\s*=\s*([\d\.]+)/s) ? $1 : 0;
-    my $lat_dir = (m/(?:N\(北緯\)及びS\(南緯\)|lat_dir)\s*=\s*([NS])/s && $1 eq 'S') ? -1 : 1;
-    my $lng_dir = (m/(?:E\(東経\)及びW\(西経\)|lon_dir)\s*=\s*([EW])/s && $1 eq 'W') ? -1 : 1;
+    my $lat_min = (m/(?:緯度分|lat_min|latm)\s*=\s*([\d\.]+)/s) ? $1 : 0;
+    my $lng_min = (m/(?:経度分|lon_min|longm)\s*=\s*([\d\.]+)/s) ? $1 : 0;
+    my $lat_sec = (m/(?:緯度秒|lat_sec|lats)\s*=\s*([\d\.]+)/s) ? $1 : 0;
+    my $lng_sec = (m/(?:経度秒|lon_sec|longs)\s*=\s*([\d\.]+)/s) ? $1 : 0;
+    my $lat_dir = (m/(?:N\(北緯\)及びS\(南緯\)|lat_dir|latNS)\s*=\s*([NS])/s && $1 eq 'S') ? -1 : 1;
+    my $lng_dir = (m/(?:E\(東経\)及びW\(西経\)|lon_dir|longEW)\s*=\s*([EW])/s && $1 eq 'W') ? -1 : 1;
     my $lat = $lat_dir * ($lat_deg + ($lat_min / 60) + ($lat_sec / 3600));
     my $lng = $lng_dir * ($lng_deg + ($lng_min / 60) + ($lng_sec / 3600));
     return "$lat\t$lng";
